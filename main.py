@@ -132,6 +132,7 @@ else:
     if path is None:
         files.remove('main.py')
         files.remove('资源文件')
+        files.remove('README.md')
     for i in files:
         if os.path.isdir(add(i)):
             c = st.columns([10, 55, 15, 10, 10])
