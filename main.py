@@ -48,20 +48,24 @@ def set_session(name):
 set_session('path')
 set_session('rename')
 set_session('delete')
+set_session('login')
 
 
 num = 0
-st.markdown('''<style>body {{background-color: {#f0f0f0};}}</style>''', unsafe_allow_html=True)
 if st.session_state['rename'] is not None:
     tar = st.session_state['rename']
     files = os.listdir(path_back(tar))
     if button('返回'):
         st.session_state['rename'] = None
         st.experimental_rerun()
-    st.title('重命名: {}'.format(add(tar)))
+    st.title('重命名: {}'.format(tar))
     c = st.columns((9, 1))
     with c[0]:
         new_name = st.text_input(label='名称', value=os.path.basename(tar))
+        if new_name == 'private':
+            st.session_state['login'] = True
+            st.session_state['rename'] = None
+            st.experimental_rerun()
     with c[1]:
         if new_name in files or len(new_name) == 0:
             st.image(image_path('error.ico'))
@@ -89,7 +93,7 @@ elif st.session_state['delete'] is not None:
     if button('返回'):
         st.session_state['delete'] = None
         st.experimental_rerun()
-    st.title('删除: {}'.format(add(tar)))
+    st.title('删除: {}'.format(tar))
     if type:
         st.subheader('删除后连同文件夹中的文件都将无法恢复，确认删除？')
     else:
@@ -107,6 +111,14 @@ elif st.session_state['delete'] is not None:
         except Exception as e:
             st.error(f'删除失败:{e}')
             st.text('请使用上面的返回按钮返回')
+
+
+elif st.session_state['login'] is not None:
+    secret = st.text_input(label='输入密码', type='password')
+    if secret == st.secrets['sec']:
+        st.session_state['path'] = 'private'
+        st.session_state['login'] = None
+        st.experimental_rerun()
 
 
 
@@ -132,7 +144,10 @@ else:
     if path is None:
         files.remove('main.py')
         files.remove('资源文件')
-        files.remove('README.md')
+        try:
+            files.remove('private')
+        except:
+            pass
     for i in files:
         if os.path.isdir(add(i)):
             c = st.columns([10, 55, 15, 10, 10])
@@ -198,3 +213,6 @@ else:
     if upload_file is not None:
         with open(add(upload_file.name), 'wb') as w:
             w.write(upload_file.getvalue())
+        st.experimental_rerun()
+
+# F:\\python\\Scripts\\streamlit run main.py
