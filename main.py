@@ -148,6 +148,10 @@ else:
         files.remove('main.py')
         files.remove('资源文件')
         try:
+            files.remove('README.md')
+        except:
+            pass
+        try:
             files.remove('private')
         except:
             pass
