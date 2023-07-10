@@ -189,9 +189,9 @@ else:
                 elif mat in ('bat'):
                     pass
                 elif mat in ('py', 'pyw'):
-                    st.image(image_path('.py.pyw.ico'))
+                    st.image(image_path('py.pyw.ico'))
                 elif mat in ('pyc'):
-                    st.image(image_path('.pyc.ico'))
+                    st.image(image_path('pyc.ico'))
                 else:
                     st.image(image_path('未知文件.ico'))
 
