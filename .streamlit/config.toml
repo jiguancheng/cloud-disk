@@ -1,0 +1,7 @@
+[theme]
+base="light"
+backgroundColor="#eaeaea"
+secondaryBackgroundColor="#e4e4e4"
+[server]
+maxUploadSize = 1024
+maxMessageSize = 1024
