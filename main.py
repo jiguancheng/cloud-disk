@@ -62,7 +62,7 @@ if st.session_state['rename'] is not None:
     c = st.columns((9, 1))
     with c[0]:
         new_name = st.text_input(label='名称', value=os.path.basename(tar))
-        if new_name == 'private':
+        if new_name == 'private' and '/' not in tar:
             st.session_state['login'] = True
             st.session_state['rename'] = None
             st.experimental_rerun()
@@ -114,6 +114,9 @@ elif st.session_state['delete'] is not None:
 
 
 elif st.session_state['login'] is not None:
+    if button('返回'):
+        st.session_state['login'] = None
+        st.experimental_rerun()
     secret = st.text_input(label='输入密码', type='password')
     if secret == st.secrets['sec']:
         st.session_state['path'] = 'private'
@@ -148,6 +151,7 @@ else:
             files.remove('private')
         except:
             pass
+        files.remove('.streamlit')
     for i in files:
         if os.path.isdir(add(i)):
             c = st.columns([10, 55, 15, 10, 10])
