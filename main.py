@@ -150,7 +150,7 @@ else:
         try:
             files.remove('private')
         except:
-            pass
+            os.mkdir('private')
         files.remove('.streamlit')
     for i in files:
         if os.path.isdir(add(i)):
