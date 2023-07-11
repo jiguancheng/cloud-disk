@@ -135,6 +135,7 @@ else:
             st.session_state['path'] = path_back(path)
             st.experimental_rerun()
     files = os.listdir(path)
+    st.text(files)
     if button('新建文件夹'):
         if '新建文件夹' in files:
             i = 1
