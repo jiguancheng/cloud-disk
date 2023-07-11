@@ -148,10 +148,6 @@ else:
         files.remove('main.py')
         files.remove('资源文件')
         try:
-            files.remove('README.md')
-        except:
-            pass
-        try:
             files.remove('private')
         except:
             pass
@@ -178,30 +174,33 @@ else:
     for i in files:
         if os.path.isfile(add(i)):
             c = st.columns([10, 55, 15, 10, 10])
-            with c[0]:
-                mat = i.split('.')[-1].lower()
-                if mat in ('png', 'jpg', 'jpeg', 'bmp', 'gif'):
-                    try:
-                        th = im.open(add(i))
-                        th.thumbnail((240, 240))
-                        st.image(th)
-                    except:
-                        st.image(image_path('图片图标.png'))
-                elif mat in ('mp4', 'avy', 'ts'):
-                    try:
-                        raise ValueError
-                    except:
-                        st.image(image_path('视频图标.png'))
-                elif mat in ('mp3', 'wav', 'm4a'):
-                    st.image(image_path('音乐图标.png'))
-                elif mat in ('bat'):
-                    pass
-                elif mat in ('py', 'pyw'):
-                    st.image(image_path('py.pyw.ico'))
-                elif mat in ('pyc'):
-                    st.image(image_path('pyc.ico'))
-                else:
-                    st.image(image_path('未知文件.ico'))
+            try:
+                with c[0]:
+                    mat = i.split('.')[-1].lower()
+                    if mat in ('png', 'jpg', 'jpeg', 'bmp', 'gif'):
+                        try:
+                            th = im.open(add(i))
+                            th.thumbnail((240, 240))
+                            st.image(th)
+                        except:
+                            st.image(image_path('图片图标.png'))
+                    elif mat in ('mp4', 'avy', 'ts'):
+                        try:
+                            raise ValueError
+                        except:
+                            st.image(image_path('视频图标.png'))
+                    elif mat in ('mp3', 'wav', 'm4a'):
+                        st.image(image_path('音乐图标.png'))
+                    elif mat in ('bat'):
+                        pass
+                    elif mat in ('py', 'pyw'):
+                        st.image(image_path('py.pyw.ico'))
+                    elif mat in ('pyc'):
+                        st.image(image_path('pyc.ico'))
+                    else:
+                        st.image(image_path('未知文件.ico'))
+            except:
+                pass
 
 
             with c[1]:
