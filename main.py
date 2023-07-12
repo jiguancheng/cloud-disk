@@ -145,7 +145,7 @@ else:
         else:
             os.mkdir(add('新建文件夹'))
         st.experimental_rerun()
-    if path is None:
+    if False:
         files.remove('main.py')
         files.remove('资源文件')
         try:
@@ -157,7 +157,10 @@ else:
         if os.path.isdir(add(i)):
             c = st.columns([10, 55, 15, 10, 10])
             with c[0]:
-                st.image('资源文件\\文件夹.png')
+                try:
+                    st.image('资源文件\\文件夹.png')
+                except:
+                    pass
             with c[1]:
                 st.code(i)
             with c[2]:
