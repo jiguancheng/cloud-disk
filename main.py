@@ -8,7 +8,7 @@ import shutil
 def button(*args, **kwargs):
     global num
     num += 1
-    return st.button(key=num, *args, **kwargs)
+    return st.button(key=num, use_container_width=True, *args, **kwargs)
 
 
 def download_button(*args, **kwargs):
@@ -49,8 +49,8 @@ set_session('path')
 set_session('rename')
 set_session('delete')
 set_session('login')
-
-
+set_session('multi_select')
+set_session('input_secret')
 num = 0
 if st.session_state['rename'] is not None:
     tar = st.session_state['rename']
@@ -68,9 +68,15 @@ if st.session_state['rename'] is not None:
             st.experimental_rerun()
     with c[1]:
         if new_name in files or len(new_name) == 0:
-            st.image(image_path('error.ico'))
+            try:
+                st.image(image_path('error.ico'))
+            except:
+                pass
         else:
-            st.image(image_path('fine.ico'))
+            try:
+                st.image(image_path('fine.ico'))
+            except:
+                pass
 
     if button('确定'):
         back = path_back(tar)
@@ -123,42 +129,75 @@ elif st.session_state['login'] is not None:
         st.session_state['login'] = None
         st.experimental_rerun()
 
+elif st.session_state['multi_select'] is not None:
+    path = st.session_state['multi_select']
+    st.markdown('<div><h1 style="text-align:center">云盘</h1></div>', unsafe_allow_html=True)
+    st.subheader(f'listing: {st.session_state["path"] if st.session_state["path"] is not None else "根目录"}')
+    files = os.listdir(path)
+    c = st.columns((1, 1))
+    with c[0]:
+        if button('删除'):
+            pass
+    with c[1]:
+        if button('下载'):
+            pass
+    select = st.data_editor([[st.image()]])
 
+elif st.session_state['input_secret'] is not None:
+    if button('返回'):
+        st.session_state['input_secret'] = None
+        st.experimental_rerun()
+    secret = st.text_input(label='输入密码', type='password')
+    if secret == st.secrets['sec']:
+        if button('确认'):
+            try:
+                os.remove(add('.hidden'))
+            except FileNotFoundError:
+                pass
+            st.session_state['input_secret'] = None
+            st.experimental_rerun()
 
 else:
-    st.title('云盘')
-    st.subheader('listing:  {}'.format(st.session_state['path']))
-    upload_file = st.file_uploader('上传文件')
+    st.markdown('<div><h1 style="text-align:center">云盘</h1></div>', unsafe_allow_html=True)
+    st.subheader(f'listing: {st.session_state["path"] if st.session_state["path"] is not None else "根目录"}')
+    upload_file = st.file_uploader('上传文件', accept_multiple_files=True)
     path = st.session_state['path']
     if path is not None:
         if button('返回'):
             st.session_state['path'] = path_back(path)
             st.experimental_rerun()
     files = os.listdir(path)
-    st.text(files)
-    if button('新建文件夹'):
-        if '新建文件夹' in files:
-            i = 1
-            while '新建文件夹 ({})'.format(i) in files:
-                i += 1
-            os.mkdir(add('新建文件夹 ({})'.format(i)))
-        else:
-            os.mkdir(add('新建文件夹'))
-        st.experimental_rerun()
-    if False:
-        files.remove('main.py')
-        files.remove('资源文件')
-        try:
-            files.remove('private')
-        except:
-            os.mkdir('private')
-        files.remove('.streamlit')
+    if '.hidden' in files:
+        files.remove('.hidden')
+        with open(add('.hidden'), 'r', encoding='utf-8') as f:
+            for i in f.read().split('\n'):
+                if i in files:
+                    files.remove(i)
+    c = st.columns((25, 25, 25, 25))
+    with c[0]:
+        if button('新建文件夹'):
+            if '新建文件夹' in files:
+                i = 1
+                while '新建文件夹 ({})'.format(i) in files:
+                    i += 1
+                os.mkdir(add('新建文件夹 ({})'.format(i)))
+            else:
+                os.mkdir(add('新建文件夹'))
+            st.experimental_rerun()
+    with c[1]:
+        if button('多选'):
+            st.session_state['multi_select'] = path
+            st.experimental_rerun()
+    with c[2]:
+        if button('显示隐藏文件'):
+            st.session_state['input_secret'] = True
+            st.experimental_rerun()
     for i in files:
         if os.path.isdir(add(i)):
-            c = st.columns([10, 55, 15, 10, 10])
+            c = st.columns([10, 62, 13, 10, 5])
             with c[0]:
                 try:
-                    st.image('资源文件\\文件夹.png')
+                    st.image(image_path('文件夹.png'))
                 except:
                     pass
             with c[1]:
@@ -177,15 +216,16 @@ else:
                     st.experimental_rerun()
     for i in files:
         if os.path.isfile(add(i)):
-            c = st.columns([10, 55, 15, 10, 10])
+            c = st.columns([10, 62, 13, 10, 5])
             try:
                 with c[0]:
                     mat = i.split('.')[-1].lower()
-                    if mat in ('png', 'jpg', 'jpeg', 'bmp', 'gif'):
+                    if mat in ('png', 'jpg', 'jpeg', 'bmp', 'gif', 'ico'):
                         try:
                             th = im.open(add(i))
                             th.thumbnail((240, 240))
                             st.image(th)
+                            st.text(add(i))
                         except:
                             st.image(image_path('图片图标.png'))
                     elif mat in ('mp4', 'avy', 'ts'):
@@ -206,7 +246,6 @@ else:
             except:
                 pass
 
-
             with c[1]:
                 st.code(i + '\n' + '{}  B'.format(os.path.getsize(add(i))))
             with c[2]:
@@ -214,16 +253,19 @@ else:
                     st.session_state['rename'] = add(i)
                     st.experimental_rerun()
             with c[3]:
-                download_button('下载', data=open(add(i), 'rb').read(), file_name=i)
+                try:
+                    download_button('下载', data=open(add(i), 'rb').read(), file_name=i)
+                except PermissionError:
+                    st.text('访问被拒')
             with c[4]:
                 if button('×'):
                     st.session_state['delete'] = add(i)
                     st.experimental_rerun()
 
-
-    if upload_file is not None:
-        with open(add(upload_file.name), 'wb') as w:
-            w.write(upload_file.getvalue())
+    if len(upload_file) != 0:
+        for i in upload_file:
+            with open(add(i.name), 'wb') as w:
+                w.write(i.getvalue())
         st.experimental_rerun()
 
 # F:\\python\\Scripts\\streamlit run main.py
