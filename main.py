@@ -5,6 +5,14 @@ import time as t
 import shutil
 
 
+def download(path):
+    try:
+        return open(path, 'rb').read()
+    except PermissionError:
+        st.error('访问被拒')
+        return None
+
+
 def button(*args, **kwargs):
     global num
     num += 1
@@ -51,6 +59,8 @@ set_session('delete')
 set_session('login')
 set_session('multi_select')
 set_session('input_secret')
+set_session('update')
+
 num = 0
 if st.session_state['rename'] is not None:
     tar = st.session_state['rename']
@@ -134,6 +144,12 @@ elif st.session_state['multi_select'] is not None:
     st.markdown('<div><h1 style="text-align:center">云盘</h1></div>', unsafe_allow_html=True)
     st.subheader(f'listing: {st.session_state["path"] if st.session_state["path"] is not None else "根目录"}')
     files = os.listdir(path)
+    if '.hidden' in files:
+        files.remove('.hidden')
+        with open(add('.hidden'), 'r', encoding='utf-8') as f:
+            for i in f.read().split('\n'):
+                if i in files:
+                    files.remove(i)
     c = st.columns((1, 1))
     with c[0]:
         if button('删除'):
@@ -141,7 +157,10 @@ elif st.session_state['multi_select'] is not None:
     with c[1]:
         if button('下载'):
             pass
-    select = st.data_editor([[st.image()]])
+    if button('返回'):
+        st.session_state['multi_select'] = None
+        st.experimental_rerun()
+    select = st.multiselect(label='请选择', options=files, max_selections=None, )
 
 elif st.session_state['input_secret'] is not None:
     if button('返回'):
@@ -157,10 +176,23 @@ elif st.session_state['input_secret'] is not None:
             st.session_state['input_secret'] = None
             st.experimental_rerun()
 
+elif st.session_state['update']:
+    st.title('上传成功')
+    if button('确定'):
+        st.session_state['update'] = False
+        st.experimental_rerun()
+
 else:
     st.markdown('<div><h1 style="text-align:center">云盘</h1></div>', unsafe_allow_html=True)
     st.subheader(f'listing: {st.session_state["path"] if st.session_state["path"] is not None else "根目录"}')
     upload_file = st.file_uploader('上传文件', accept_multiple_files=True)
+    if len(upload_file) != 0:
+        for i in upload_file:
+            with st.spinner('上传中'):
+                with open(add(i.name), 'wb') as w:
+                    w.write(i.getvalue())
+        st.session_state['update'] = True
+        st.experimental_rerun()
     path = st.session_state['path']
     if path is not None:
         if button('返回'):
@@ -225,7 +257,6 @@ else:
                             th = im.open(add(i))
                             th.thumbnail((240, 240))
                             st.image(th)
-                            st.text(add(i))
                         except:
                             st.image(image_path('图片图标.png'))
                     elif mat in ('mp4', 'avy', 'ts'):
@@ -261,11 +292,5 @@ else:
                 if button('×'):
                     st.session_state['delete'] = add(i)
                     st.experimental_rerun()
-
-    if len(upload_file) != 0:
-        for i in upload_file:
-            with open(add(i.name), 'wb') as w:
-                w.write(i.getvalue())
-        st.experimental_rerun()
 
 # F:\\python\\Scripts\\streamlit run main.py
