@@ -205,7 +205,7 @@ else:
             st.session_state['path'] = path_back(path)
             st.experimental_rerun()
     else:
-        if private not in files:
+        if 'private' not in files:
             os.mkdir('private')
     if '.hidden' in files:
         files.remove('.hidden')
